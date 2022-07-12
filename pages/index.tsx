@@ -2,20 +2,19 @@ import React from "react"
 import { GetStaticProps } from "next"
 import Layout from "../components/Layout"
 import Post, { PostProps } from "../components/Post"
+import prisma from '../lib/prisma';
 
 export const getStaticProps: GetStaticProps = async () => {
-  const feed = [
-    {
-      id: "1",
-      title: "Prisma is the perfect ORM for Next.js",
-      content: "[Prisma](https://github.com/prisma/prisma) and Next.js go _great_ together!",
-      published: false,
+  const feed = await prisma.post.findMany({
+    // A where filter is specified to include only Post records where published is true
+    where: { published: true},
+    include: {
       author: {
-        name: "Nikolas Burk",
-        email: "burk@prisma.io",
-      },
-    },
-  ]
+        // The name of the author of the Post record is queried as well and will be included in the returned objects
+        select: { name: true },
+      }
+    }
+  })
   return { 
     props: { feed }, 
     revalidate: 10 
