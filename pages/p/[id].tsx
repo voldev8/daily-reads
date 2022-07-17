@@ -1,16 +1,15 @@
 import React from "react"
 import { GetServerSideProps } from "next"
-import ReactMarkdown from "react-markdown"
 import Layout from "../../components/Layout"
-import { PostProps } from "../../components/Post"
+import { ArticleProps } from "../../components/Article"
 import prisma from '../../lib/prisma'
 import Router from 'next/router';
 import { useSession } from 'next-auth/react';
 
 // This page uses getServerSideProps (SSR) instead of getStaticProps (SSG). 
-// This is because the data is dynamic, it depends on the id of the Post that's requested in the URL. 
+// This is because the data is dynamic, it depends on the id of the Article that's requested in the URL. 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
-  const post = await prisma.post.findUnique({
+  const article = await prisma.article.findUnique({
     where: {
       id: String(params?.id)
     },
@@ -21,34 +20,34 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     }
   })
   return {
-    props: post,
+    props: article,
   }
 }
-async function publishPost(id: string): Promise<void> {
-  await fetch(`/api/publish/${id}`, {
+async function readArticle(id: string): Promise<void> {
+  await fetch(`/api/read/${id}`, {
     method: 'PUT',
   })
   await Router.push('/')
 }
 
-async function deletePost(id: string): Promise<void> {
-  await fetch(`/api/post/${id}`, {
+async function deleteArticle(id: string): Promise<void> {
+  await fetch(`/api/article/${id}`, {
     method: 'DELETE',
   });
   Router.push('/');
 }
 
-const Post: React.FC<PostProps> = (props) => {
+const Article: React.FC<ArticleProps> = (props) => {
   const { data: session, status } = useSession();
   if (status === 'loading') {
     return <div>Authenticating...</div>
   }
   const userHasValidSession = Boolean(session);
-  const postBelongToUser = session?.user?.email === props.author?.email;
+  const articleBelongToUser = session?.user?.email === props.author?.email;
 
   let title = props.title
-  if (!props.published) {
-    title = `${title} (Draft)`
+  if (!props.read) {
+    title = `${title}`
   }
 
   return (
@@ -56,13 +55,15 @@ const Post: React.FC<PostProps> = (props) => {
       <div>
         <h2>{title}</h2>
         <p>By {props?.author?.name || "Unknown author"}</p>
-        <ReactMarkdown children={props.content} />
-        {!props.published && userHasValidSession && postBelongToUser && (
-          <button onClick={()=>publishPost(props.id)}>Publish</button>
-        )}
-        { userHasValidSession && postBelongToUser && (
-          <button onClick={()=>deletePost(props.id)}>Delete</button>
-        )}
+        <a href={props.link} target="_blank">{props.link}</a>
+        <div>
+          {!props.read && userHasValidSession && articleBelongToUser && (
+            <button onClick={()=>readArticle(props.id)}>Read</button>
+          )}
+          { userHasValidSession && articleBelongToUser && (
+            <button onClick={()=>deleteArticle(props.id)}>Delete</button>
+          )}
+        </div>
       </div>
       <style jsx>{`
         .page {
@@ -89,4 +90,4 @@ const Post: React.FC<PostProps> = (props) => {
   )
 }
 
-export default Post
+export default Article

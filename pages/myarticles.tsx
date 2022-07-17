@@ -2,43 +2,58 @@ import React from 'react';
 import { GetServerSideProps } from 'next';
 import { useSession, getSession } from 'next-auth/react';
 import Layout from '../components/Layout';
-import Post, { PostProps } from '../components/Post';
+import Article, { ArticleProps } from '../components/Article';
 import prisma from '../lib/prisma';
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const session = await getSession({ req });
   if (!session) {
     res.statusCode = 403;
-    return { props: { drafts: [] } };
+    return { props: { myArticles: [] } };
   }
 
-  const drafts = await prisma.post.findMany({
+  const myArticles = await prisma.article.findMany({
     where: {
-      author: { email: session.user.email },
-      published: false,
+      NOT: {
+        readUsers: {
+          some: {
+            name: session.user.name
+          }
+        }
+      }
     },
     include: {
       author: {
-        select: { name: true },
+        select: { 
+          name: true,
+          id: true 
+        },
       },
-    },
+      readUsers: {
+        select: { 
+          name: true,
+          id: true 
+        },
+      }
+    }
   });
+
   return {
-    props: { drafts },
+    props: { myArticles },
   };
 };
 
 type Props = {
-  drafts: PostProps[];
+  myArticles: ArticleProps[];
 };
 
-const Drafts: React.FC<Props> = (props) => {
+const MyArticles: React.FC<Props> = (props) => {
   const { data: session } = useSession();
 
   if (!session) {
     return (
       <Layout>
-        <h1>My Drafts</h1>
+        <h1>My Articles</h1>
         <div>You need to be authenticated to view this page.</div>
       </Layout>
     );
@@ -47,26 +62,26 @@ const Drafts: React.FC<Props> = (props) => {
   return (
     <Layout>
       <div className="page">
-        <h1>My Drafts</h1>
+        <h1>My Articles</h1>
         <main>
-          {props.drafts.map((post) => (
-            <div key={post.id} className="post">
-              <Post post={post} />
+          {props.myArticles.map((article) => (
+            <div key={article.id} className="article">
+              <Article article={article} />
             </div>
           ))}
         </main>
       </div>
       <style jsx>{`
-        .post {
+        .article {
           background: var(--geist-background);
           transition: box-shadow 0.1s ease-in;
         }
 
-        .post:hover {
+        .article:hover {
           box-shadow: 1px 1px 3px #aaa;
         }
 
-        .post + .post {
+        .article + .article {
           margin-top: 2rem;
         }
       `}</style>
@@ -74,4 +89,4 @@ const Drafts: React.FC<Props> = (props) => {
   );
 };
 
-export default Drafts;
+export default MyArticles;

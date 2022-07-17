@@ -4,18 +4,19 @@ import Router from 'next/router';
 
 const Draft: React.FC = () => {
   const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  const [link, setLink] = useState('');
+  const [tags, setTags] = useState('');
 
   const submitData = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     try {
-      const body = {title, content};
-      await fetch('/api/post', {
+      const body = {title, link, tags};
+      await fetch('/api/article', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
-      await Router.push('/drafts');
+      await Router.push('/myarticles');
     } catch(error) {
       console.log(error)
     }
@@ -25,7 +26,7 @@ const Draft: React.FC = () => {
     <Layout>
       <div>
         <form onSubmit={submitData}>
-          <h1>New Draft</h1>
+          <h1>New Article</h1>
           <input
             autoFocus
             onChange={(e) => setTitle(e.target.value)}
@@ -33,14 +34,19 @@ const Draft: React.FC = () => {
             type="text"
             value={title}
           />
-          <textarea
-            cols={50}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="Content"
-            rows={8}
-            value={content}
+          <input
+            onChange={(e) => setLink(e.target.value)}
+            placeholder="Link"
+            type="text"
+            value={link}
           />
-          <input disabled={!content || !title} type="submit" value="Create" />
+          <input
+            onChange={(e) => setTags(e.target.value)}
+            placeholder="Tags (Please leave only space between tags)"
+            type="text"
+            value={tags}
+          />
+          <input disabled={!link || !title} type="submit" value="Create" />
           <a className="back" href="#" onClick={() => Router.push('/')}>
             or Cancel
           </a>

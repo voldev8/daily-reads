@@ -9,16 +9,30 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-// schema.prisma
 
-
-model Post {
-  id        String  @id @default(cuid())
+model Article {
+  id        String   @id @default(cuid())
   title     String
-  content   String?
-  published Boolean @default(false)
-  author    User?   @relation(fields: [authorId], references: [id])
+  link      String
+  tags      String[]
+  readUsers User[]   @relation("read_articles")
+  author    User?    @relation(fields: [authorId], references: [id])
   authorId  String?
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String?
+  email        String?   @unique
+  image        String?
+  createdAt    DateTime  @default(now()) @map(name: "created_at")
+  updatedAt    DateTime  @updatedAt @map(name: "updated_at")
+  readArticles Article[] @relation("read_articles")
+  articles     Article[]
+  accounts     Account[]
+  sessions     Session[]
+
+  @@map(name: "users")
 }
 
 model Account {
@@ -53,21 +67,6 @@ model Session {
   @@map("sessions")
 }
 
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime? @map("email_verified")
-  image         String?
-  createdAt     DateTime  @default(now()) @map(name: "created_at")
-  updatedAt     DateTime  @updatedAt @map(name: "updated_at")
-  posts         Post[]
-  accounts      Account[]
-  sessions      Session[]
-
-  @@map(name: "users")
-}
-
 model VerificationToken {
   identifier String
   token      String   @unique
@@ -77,3 +76,13 @@ model VerificationToken {
   @@map("verificationtokens")
 }
 
+// model ArticlesOnUsers {
+//   readArticle   Article @relation(fields: [readArticleId], references: [id])
+//   readArticleId String // relation scalar field (used in the `@relation` attribute above)
+//   readUser      User    @relation(fields: [readUserId], references: [id])
+//   readUserId    String // relation scalar field (used in the `@relation` attribute above)
+//   // assignedAt    DateTime @default(now())
+//   // assignedBy    String
+
+//   @@id([readArticleId, readUserId])
+// }

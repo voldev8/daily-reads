@@ -13,23 +13,22 @@ const Header: React.FC = () => {
   let left = (
     <div className="left">
       <Link href="/">
-        <a className="bold" data-active={isActive("/")}>
-          Feed
+        <a className="logo" data-active={isActive("/")}>
+          Daily Reads
         </a>
       </Link>
       <style jsx>{`
-        .bold {
-          font-weight: bold;
-        }
-
-        a {
+        .logo {
           text-decoration: none;
-          color: #000;
-          display: inline-block;
-        }
-
-        .left a[data-active="true"] {
-          color: gray;
+          font-size: 2rem;
+          font-weight: bold;
+          color: #f7cfc8;
+          text-shadow: -1px 1px 0px #4d84c8,
+                       -2px 2px 0px #4d84c8,
+                       -3px 3px 0px #4d84c8,
+                       -4px 4px 0px #4d84c8,
+                       -5px 5px 0px #4d84c8,
+                       -6px 6px 0px #4d84c8;
         }
 
         a + a {
@@ -42,34 +41,6 @@ const Header: React.FC = () => {
   let right = null;
 
   if (status === 'loading') {
-    left = (
-      <div className="left">
-        <Link href="/">
-          <a className="bold" data-active={isActive('/')}>
-            Feed
-          </a>
-        </Link>
-        <style jsx>{`
-          .bold {
-            font-weight: bold;
-          }
-
-          a {
-            text-decoration: none;
-            color: var(--geist-foreground);
-            display: inline-block;
-          }
-
-          .left a[data-active='true'] {
-            color: gray;
-          }
-
-          a + a {
-            margin-left: 1rem;
-          }
-        `}</style>
-      </div>
-    );
     right = (
       <div className="right">
         <p>Validating session ...</p>
@@ -114,45 +85,15 @@ const Header: React.FC = () => {
   }
 
   if (session) {
-    left = (
-      <div className="left">
-        <Link href="/">
-          <a className="bold" data-active={isActive('/')}>
-            Feed
-          </a>
-        </Link>
-        <Link href="/drafts">
-          <a data-active={isActive('/drafts')}>My drafts</a>
-        </Link>
-        <style jsx>{`
-          .bold {
-            font-weight: bold;
-          }
-
-          a {
-            text-decoration: none;
-            color: var(--geist-foreground);
-            display: inline-block;
-          }
-
-          .left a[data-active='true'] {
-            color: gray;
-          }
-
-          a + a {
-            margin-left: 1rem;
-          }
-        `}</style>
-      </div>
-    );
     right = (
       <div className="right">
+        <img className="user-image" src={session.user.image} alt="user image" />
         <p>
           {session.user.name} ({session.user.email})
         </p>
         <Link href="/create">
           <button>
-            <a>New post</a>
+            <a>New article</a>
           </button>
         </Link>
         <button onClick={() => signOut()}>
@@ -163,6 +104,14 @@ const Header: React.FC = () => {
             text-decoration: none;
             color: var(--geist-foreground);
             display: inline-block;
+          }
+          .user-image {
+            border-radius: 50%;
+            height: 2rem;
+            display: flex;
+            align-self: center;
+            margin-right: 4px;
+            border: 1px solid #4d84c8;
           }
 
           p {
@@ -177,6 +126,7 @@ const Header: React.FC = () => {
 
           .right {
             margin-left: auto;
+            display: flex;
           }
 
           .right a {
@@ -203,6 +153,7 @@ const Header: React.FC = () => {
           display: flex;
           padding: 2rem;
           align-items: center;
+          box-shadow: 2px 2px 4px rgba(0,0,0,0.2)
         }
       `}</style>
     </nav>

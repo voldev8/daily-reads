@@ -1,13 +1,13 @@
 import prisma from '../../../lib/prisma';
 
-// DELETE /api/post/:id
+// DELETE /api/article/:id
 export default async function handle(req, res) {
-  const postId = req.query.id;
+  const articleId = req.query.id;
   if (req.method === 'DELETE') {
-    const post = await prisma.post.delete({
-      where: { id: postId },
+    const article = await prisma.article.delete({
+      where: { id: articleId },
     });
-    res.json(post);
+    res.json(article);
   } else {
     throw new Error(
       `The HTTP ${req.method} method is not supported at this route.`,
